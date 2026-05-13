@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "wfa-shared"
+version = "0.1.0"
+description = "Shared branding, UI, and API utilities for Wallscourt Farm Academy Streamlit apps"
+requires-python = ">=3.10"
+license = "MIT"
+
+[tool.setuptools.packages.find]
+include = ["wfa_shared*"]
