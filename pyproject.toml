@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wfa-shared"
-version = "0.1.0"
+version = "0.1.1"
 description = "Shared branding, UI, and API utilities for Wallscourt Farm Academy Streamlit apps"
 requires-python = ">=3.10"
 license = "MIT"
