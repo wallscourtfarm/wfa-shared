@@ -2,7 +2,7 @@
 
 import os
 
-DEFAULT_MODEL = "claude-sonnet-4-20250514"
+DEFAULT_MODEL = "claude-sonnet-4-5"
 
 
 def get_anthropic_client(api_key: str | None = None):
