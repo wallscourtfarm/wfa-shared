@@ -103,7 +103,12 @@
   }
 
   const LUNCH_MENU_URL = 'https://staff.wallscourt-farm-academy.co.uk/menu.json';
-  const LUNCH_OVERRIDE_URL = 'https://script.google.com/macros/s/AKfycbz0yYbvPGa7csQYwJAQg7NTRYrbNjt-wgz4XYjdSEJ1GxuV2rQornoKicohiKDoBbhC/exec';
+  // CUT OVER 22.09.26 to the Postgres-backed store (wfa-data) — real live
+  // state (empty at migration time) backfilled and verified first. Old
+  // Apps Script backend deliberately left running, untouched, as an
+  // instant one-line rollback if ever needed:
+  //   'https://script.google.com/macros/s/AKfycbz0yYbvPGa7csQYwJAQg7NTRYrbNjt-wgz4XYjdSEJ1GxuV2rQornoKicohiKDoBbhC/exec'
+  const LUNCH_OVERRIDE_URL = 'https://api.wallscourt-farm-academy.co.uk/planning/lunchoverrides-db';
 
   function createBoard(config) {
     const prefix = config.prefix;
