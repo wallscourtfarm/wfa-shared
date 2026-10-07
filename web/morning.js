@@ -394,9 +394,95 @@
     };
   }
 
+
+  // ── Talk timer ───────────────────────────────────────────────────────────
+  // Added 07.10.26. A teacher-started 2-minute "talk to the people around you"
+  // timer; at zero the board switches to a SILENT state. Self-contained: injects
+  // its own CSS and a strip into #right-panel just above #ctrl. Opt-in per
+  // board with one call: wfaMorning.installTalkTimer({seconds: 120}).
+  function installTalkTimer(opts) {
+    opts = opts || {};
+    const TOTAL = (opts.seconds || 120) | 0;
+    const panel = document.getElementById('right-panel');
+    const ctrl = document.getElementById('ctrl');
+    if (!panel || !ctrl || document.getElementById('talk-timer')) return;
+
+    const css = document.createElement('style');
+    css.textContent =
+      '#talk-timer{flex-shrink:0;margin-top:0.8vh;border-radius:8px;border:2.5px solid #1798d3;background:#EAF6FC;color:#0b5f87;font-family:"Nunito",sans-serif;text-align:center;cursor:pointer;user-select:none;padding:0.6vh 0.6vw;transition:background .3s,border-color .3s}' +
+      '#talk-timer .tt-lbl{font-size:clamp(0.8rem,1.8vh,1.2rem);font-weight:800;line-height:1.2}' +
+      '#talk-timer .tt-time{font-size:clamp(1.4rem,3.6vh,2.4rem);font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}' +
+      '#talk-timer .tt-hint{font-size:clamp(0.65rem,1.3vh,0.85rem);font-weight:700;opacity:.65}' +
+      '#talk-timer.run{background:#E3F6E5;border-color:#27AE60;color:#14602a;padding:1.4vh 0.6vw}' +
+      '#talk-timer.run .tt-lbl{font-size:clamp(1.1rem,2.6vh,1.8rem)}' +
+      '#talk-timer.run .tt-time{font-size:clamp(3rem,10vh,6.5rem)}' +
+      '#talk-timer.run.low{background:#FFF4D6;border-color:#E6A100;color:#7a5200}' +
+      '#talk-timer.done{background:#C0392B;border-color:#8e1f14;color:#fff;padding:1.6vh 0.6vw}' +
+      '#talk-timer.done .tt-lbl{font-size:clamp(1.8rem,5.5vh,3.6rem);letter-spacing:.08em}' +
+      '#talk-timer.done .tt-time{font-size:clamp(1.1rem,2.6vh,1.8rem);font-weight:800}';
+    document.head.appendChild(css);
+
+    const el = document.createElement('div');
+    el.id = 'talk-timer';
+    el.innerHTML = '<div class="tt-lbl"></div><div class="tt-time"></div><div class="tt-hint"></div>';
+    panel.insertBefore(el, ctrl);
+    const lbl = el.children[0], time = el.children[1], hint = el.children[2];
+
+    let state = 'idle', endAt = 0, tick = null;
+    const fmt = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+
+    function beep() {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        const ac = new AC();
+        [0, 0.35].forEach(d => {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.frequency.value = 660; o.connect(g); g.connect(ac.destination);
+          g.gain.setValueAtTime(0.0001, ac.currentTime + d);
+          g.gain.exponentialRampToValueAtTime(0.25, ac.currentTime + d + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + d + 0.3);
+          o.start(ac.currentTime + d); o.stop(ac.currentTime + d + 0.32);
+        });
+      } catch (e) { /* sound is a nicety; the visual change is what matters */ }
+    }
+
+    function render() {
+      el.className = state === 'idle' ? '' : state === 'run' ? 'run' : 'done';
+      if (state === 'idle') {
+        lbl.textContent = 'Talk time';
+        time.textContent = fmt(TOTAL);
+        hint.textContent = 'Tap to start';
+      } else if (state === 'run') {
+        const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+        el.classList.toggle('low', left <= 10);
+        lbl.textContent = 'Talk to the people around you';
+        time.textContent = fmt(left);
+        hint.textContent = 'Tap to stop';
+      } else {
+        lbl.textContent = '🤫 SILENT';
+        time.textContent = 'Eyes and minds on your learning';
+        hint.textContent = 'Tap to reset';
+      }
+    }
+    function stop() { clearInterval(tick); tick = null; }
+    function start() {
+      state = 'run'; endAt = Date.now() + TOTAL * 1000;
+      stop(); tick = setInterval(() => {
+        if (Date.now() >= endAt) { stop(); state = 'done'; beep(); }
+        render();
+      }, 250);
+      render();
+    }
+    el.addEventListener('click', () => {
+      if (state === 'idle') start();
+      else { stop(); state = 'idle'; render(); }
+    });
+    render();
+  }
+
   global.wfaMorning = global.wfaMorning || {};
   Object.assign(global.wfaMorning, {
-    createBoard,
+    createBoard, installTalkTimer,
     todayStr, getMon, getDK, shuffle, DAYS, DAYNAMES, MONTHS,
     getSchoolPhase, pickPhased,
     // Bound by createBoard so each board's markup can call
