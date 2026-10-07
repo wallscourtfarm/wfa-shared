@@ -397,7 +397,7 @@
 
   // ── Talk timer ───────────────────────────────────────────────────────────
   // Added 07.10.26. A teacher-started 2-minute "talk to the people around you"
-  // timer; at zero the board switches to a SILENT state. Self-contained: injects
+  // timer; at zero the board switches to a "No Voice (0)" state in the year theme colour, silently. Self-contained: injects
   // its own CSS and a strip into #right-panel just above #ctrl. Opt-in per
   // board with one call: wfaMorning.installTalkTimer({seconds: 120}).
   function installTalkTimer(opts) {
@@ -417,34 +417,23 @@
       '#talk-timer.run .tt-lbl{font-size:clamp(1.1rem,2.6vh,1.8rem)}' +
       '#talk-timer.run .tt-time{font-size:clamp(3rem,10vh,6.5rem)}' +
       '#talk-timer.run.low{background:#FFF4D6;border-color:#E6A100;color:#7a5200}' +
-      '#talk-timer.done{background:#C0392B;border-color:#8e1f14;color:#fff;padding:1.6vh 0.6vw}' +
-      '#talk-timer.done .tt-lbl{font-size:clamp(1.8rem,5.5vh,3.6rem);letter-spacing:.08em}' +
-      '#talk-timer.done .tt-time{font-size:clamp(1.1rem,2.6vh,1.8rem);font-weight:800}';
+      '#talk-timer.done{background:var(--tt-theme,#1798d3);border-color:var(--tt-theme,#1798d3);color:#fff;padding:1.8vh 0.6vw;animation:tt-pulse 1.6s ease-in-out infinite}' +
+      '#talk-timer.done .tt-lbl{font-size:clamp(1.4rem,3.8vh,2.6rem);font-weight:900;line-height:1.25}' +
+      '#talk-timer.done .tt-time{display:none}' +
+      '@keyframes tt-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.35)}50%{box-shadow:0 0 0 0.9vh rgba(0,0,0,0)}}';
     document.head.appendChild(css);
 
     const el = document.createElement('div');
     el.id = 'talk-timer';
+    // match the year group's theme colour (same as the Morning Messages header)
+    const hdr = document.querySelector('.msg-hdr');
+    if (hdr) el.style.setProperty('--tt-theme', getComputedStyle(hdr).backgroundColor);
     el.innerHTML = '<div class="tt-lbl"></div><div class="tt-time"></div><div class="tt-hint"></div>';
     panel.insertBefore(el, ctrl);
     const lbl = el.children[0], time = el.children[1], hint = el.children[2];
 
     let state = 'idle', endAt = 0, tick = null;
     const fmt = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
-
-    function beep() {
-      try {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        const ac = new AC();
-        [0, 0.35].forEach(d => {
-          const o = ac.createOscillator(), g = ac.createGain();
-          o.frequency.value = 660; o.connect(g); g.connect(ac.destination);
-          g.gain.setValueAtTime(0.0001, ac.currentTime + d);
-          g.gain.exponentialRampToValueAtTime(0.25, ac.currentTime + d + 0.02);
-          g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + d + 0.3);
-          o.start(ac.currentTime + d); o.stop(ac.currentTime + d + 0.32);
-        });
-      } catch (e) { /* sound is a nicety; the visual change is what matters */ }
-    }
 
     function render() {
       el.className = state === 'idle' ? '' : state === 'run' ? 'run' : 'done';
@@ -459,8 +448,7 @@
         time.textContent = fmt(left);
         hint.textContent = 'Tap to stop';
       } else {
-        lbl.textContent = '🤫 SILENT';
-        time.textContent = 'Eyes and minds on your learning';
+        lbl.textContent = '🤫 No Voice (0) - Eyes and minds on your learning';
         hint.textContent = 'Tap to reset';
       }
     }
@@ -468,7 +456,7 @@
     function start() {
       state = 'run'; endAt = Date.now() + TOTAL * 1000;
       stop(); tick = setInterval(() => {
-        if (Date.now() >= endAt) { stop(); state = 'done'; beep(); }
+        if (Date.now() >= endAt) { stop(); state = 'done'; }
         render();
       }, 250);
       render();
