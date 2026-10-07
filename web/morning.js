@@ -444,7 +444,7 @@
       } else if (state === 'run') {
         const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
         el.classList.toggle('low', left <= 10);
-        lbl.textContent = 'Talk to the people around you';
+        lbl.textContent = 'Low voice discussions with learners around you';
         time.textContent = fmt(left);
         hint.textContent = 'Tap to stop';
       } else {
