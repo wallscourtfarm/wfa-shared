@@ -7,6 +7,7 @@ import anthropic
 # Anthropic releases a new Sonnet; the rest act as automatic fallbacks so
 # tools keep working even when a model is deprecated.
 MODEL_FALLBACKS = [
+    "claude-sonnet-5-5",
     "claude-sonnet-4-6",
     "claude-sonnet-4-5",
     "claude-3-5-sonnet-20241022",
