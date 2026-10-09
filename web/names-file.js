@@ -73,6 +73,13 @@
     return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
   }
 
+  // Excel turns a value like 6E1 into 6.00E+01 (it reads it as 6 x 10^1). Writing it as ="6E1" makes Excel
+  // keep it as text; parseCsv() below understands both forms.
+  function classCell(c) {
+    c = String(c == null ? '' : c);
+    return /^\d+e\d+$/i.test(c.trim()) ? '="' + c.trim() + '"' : csvCell(c);
+  }
+
   function buildCsv(rows) {
     var byClass = {};
     rows.forEach(function (r) { (byClass[r.cls || ''] = byClass[r.cls || ''] || []).push(r); });
@@ -82,12 +89,12 @@
       var labels = initialsLabels(list.map(function (r) { return [r.first, r.last]; }));
       list.forEach(function (r, i) {
         var first = String(r.first || '').trim(), last = String(r.last || '').trim();
-        out.push([r.pupil_id, labels[i], first, last, (first + ' ' + last).trim(), c, r.year || '']);
+        out.push([r.pupil_id, labels[i], first, last, (first + ' ' + last).trim(), { cls: c }, r.year || '']);
       });
     });
-    out.sort(function (a, b) { return (a[5] + a[4]).localeCompare(b[5] + b[4]); });
+    out.sort(function (a, b) { return (a[5].cls + a[4]).localeCompare(b[5].cls + b[4]); });
     return '﻿pupil_id,initials,first_name,last_name,full_name,class,year_group\r\n' +
-      out.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n') + '\r\n';
+      out.map(function (r) { return r.map(function (v) { return v && typeof v === 'object' ? classCell(v.cls) : csvCell(v); }).join(','); }).join('\r\n') + '\r\n';
   }
 
   function parseCsvRows(text) {
@@ -146,7 +153,7 @@
         first = sp < 0 ? name : name.slice(0, sp); last = sp < 0 ? '' : name.slice(sp + 1);
       }
       map[id] = { initials: iIni >= 0 ? (r[iIni] || '').trim() : '', first: first, last: last, name: name || (first + ' ' + last).trim(),
-                  cls: iCls >= 0 ? (r[iCls] || '').trim() : '', year: iYr >= 0 ? (r[iYr] || '').trim() : '' };
+                  cls: iCls >= 0 ? (r[iCls] || '').trim().replace(/^="?|"$/g, '') : '', year: iYr >= 0 ? (r[iYr] || '').trim() : '' };
     });
     return makeNamesFile(map);
   }
