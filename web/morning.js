@@ -456,7 +456,7 @@
         time.textContent = fmt(left);
         hint.textContent = 'Tap to stop';
       } else {
-        lbl.textContent = (opts.doneImage ? '' : '🤫 ') + 'No Voice (0) - Eyes and minds on your learning';
+        lbl.textContent = opts.doneImage ? 'Eyes and minds on your learning' : '🤫 No Voice (0) - Eyes and minds on your learning';
         hint.textContent = 'Tap to reset';
       }
     }
