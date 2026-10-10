@@ -420,6 +420,8 @@
       '#talk-timer.done{background:var(--tt-theme,#1798d3);border-color:var(--tt-theme,#1798d3);color:#fff;padding:1.8vh 0.6vw;animation:tt-pulse 1.6s ease-in-out infinite}' +
       '#talk-timer.done .tt-lbl{font-size:clamp(1.4rem,3.8vh,2.6rem);font-weight:900;line-height:1.25}' +
       '#talk-timer.done .tt-time{display:none}' +
+      '#talk-timer .tt-img{display:none;height:clamp(6rem,22vh,15rem);max-width:90%;object-fit:contain;margin:0 auto 1vh;background:#fff;border-radius:12px;padding:0.8vh 1.2vh}' +
+      '#talk-timer.done .tt-img{display:block}' +
       '@keyframes tt-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.35)}50%{box-shadow:0 0 0 0.9vh rgba(0,0,0,0)}}';
     document.head.appendChild(css);
 
@@ -429,8 +431,14 @@
     const hdr = document.querySelector('.msg-hdr');
     if (hdr) el.style.setProperty('--tt-theme', getComputedStyle(hdr).backgroundColor);
     el.innerHTML = '<div class="tt-lbl"></div><div class="tt-time"></div><div class="tt-hint"></div>';
+    // optional picture shown at zero in place of the 🤫 emoji: wfaMorning.installTalkTimer({doneImage: 'data:image/png;base64,...'})
+    if (opts.doneImage) {
+      const img = document.createElement('img');
+      img.className = 'tt-img'; img.alt = '0 No Talk'; img.src = opts.doneImage;
+      el.insertBefore(img, el.firstChild);
+    }
     panel.insertBefore(el, ctrl);
-    const lbl = el.children[0], time = el.children[1], hint = el.children[2];
+    const lbl = el.querySelector('.tt-lbl'), time = el.querySelector('.tt-time'), hint = el.querySelector('.tt-hint');
 
     let state = 'idle', endAt = 0, tick = null;
     const fmt = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
@@ -448,7 +456,7 @@
         time.textContent = fmt(left);
         hint.textContent = 'Tap to stop';
       } else {
-        lbl.textContent = '🤫 No Voice (0) - Eyes and minds on your learning';
+        lbl.textContent = (opts.doneImage ? '' : '🤫 ') + 'No Voice (0) - Eyes and minds on your learning';
         hint.textContent = 'Tap to reset';
       }
     }
