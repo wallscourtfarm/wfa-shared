@@ -420,7 +420,7 @@
       '#talk-timer.done{background:var(--tt-theme,#1798d3);border-color:var(--tt-theme,#1798d3);color:#fff;padding:1.8vh 0.6vw;animation:tt-pulse 1.6s ease-in-out infinite}' +
       '#talk-timer.done .tt-lbl{font-size:clamp(1.4rem,3.8vh,2.6rem);font-weight:900;line-height:1.25}' +
       '#talk-timer.done .tt-time{display:none}' +
-      '#talk-timer .tt-img{display:none;height:clamp(6rem,22vh,15rem);max-width:90%;object-fit:contain;margin:0 auto 1vh;background:#fff;border-radius:12px;padding:0.8vh 1.2vh}' +
+      '#talk-timer .tt-img{display:none;height:clamp(4.5rem,15vh,10rem);max-width:90%;object-fit:contain;margin:0 auto 1vh;background:#fff;border-radius:12px;padding:0.8vh 1.2vh}' +
       '#talk-timer.done .tt-img{display:block}' +
       '@keyframes tt-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.35)}50%{box-shadow:0 0 0 0.9vh rgba(0,0,0,0)}}';
     document.head.appendChild(css);
